@@ -25,24 +25,26 @@ export default class OrderRepository implements OrderRepositoryInterface {
     }
 
     async update(entity: Order): Promise<void> {
-        await OrderModel.update(
-            {
-                customer_id: entity.customerId,
-                total: entity.total(),
-                items: entity.items.map((item) => ({
-                    id: item.id,
-                    name: item.name,
-                    price: item.price,
-                    product_id: item.productId,
-                    quantity: item.quantity,
-                })),
-            },
-            {
-                where: { 
-                    id: entity.id, 
-                }
-            }
-        );
+        const sequelize = OrderModel.sequelize;
+        await sequelize.transaction(async (t) => {
+            await OrderItemModel.destroy({
+                where: { order_id: entity.id },
+                transaction: t,
+            });
+            const items = entity.items.map((item) => ({
+                id: item.id,
+                name: item.name,
+                order_id: entity.id,
+                price: item.price,
+                product_id: item.productId,
+                quantity: item.quantity,
+            }));
+            await OrderItemModel.bulkCreate(items, { transaction: t });
+            await OrderModel.update(
+                { total: entity.total() },
+                { where: { id: entity.id }, transaction: t }
+            );
+        });
     }
 
     async find(id: string): Promise<Order> {
@@ -62,23 +64,25 @@ export default class OrderRepository implements OrderRepositoryInterface {
         return order;
     }
 
-    findAll(): Promise<Order[]> {
-        throw new Error("Method not implemented.");
-    }
+    // findAll(): Promise<Order[]> {
+    //     throw new Error("Method not implemented.");
+    // }
 
 // ERROR TypeError: Converting circular structure to JSON
-    // async findAll(): Promise<Order[]> {
-    //     const orderModels = await OrderModel.findAll();
-
-    //     const orders = orderModels.map((orderModel) => {
-    //         let orderItems = orderModel.items.map((item) => {
-    //             return new OrderItem(item.id, item.name, item.price, item.product_id, item.quantity);
-    //         });
-    //         const order = new Order(orderModel.id, orderModel.customer_id, orderItems);
-    //         return order;
-    //     });
-    //     return orders;
-    // }
+    async findAll(): Promise<Order[]> {
+        const orderModels = await OrderModel.findAll({
+            include: [OrderItemModel],
+        });
+        
+        const orders = orderModels.map((orderModel) => {
+            let orderItems = orderModel.items.map((item) => {
+                return new OrderItem(item.id, item.name, item.price, item.product_id, item.quantity);
+            });
+            const order = new Order(orderModel.id, orderModel.customer_id, orderItems);
+            return order;
+        });
+        return orders;
+    }
 
     
    

@@ -22,7 +22,6 @@ describe("Order repository unit test", () => {
             storage: ':memory:',
             logging: false,
             sync: { force: true },
-
         });
         sequelize.addModels([CustomerModel, OrderModel, OrderItemModel, ProductModel]);
         await sequelize.sync();
@@ -127,12 +126,12 @@ describe("Order repository unit test", () => {
             total: order2.total(),
             items: [
                 {
-                    id: orderItem.id,
-                    name: orderItem.name,
-                    price: orderItem.price,
-                    quantity: orderItem.quantity,
+                    id: orderItem2.id,
+                    name: orderItem2.name,
+                    price: orderItem2.price,
+                    quantity: orderItem2.quantity,
                     order_id: "123",
-                    product_id: orderItem.productId
+                    product_id: orderItem2.productId
                 }
             ]
         });
@@ -175,7 +174,7 @@ describe("Order repository unit test", () => {
     });
 
     //Error TypeError: Converting circular structure to JSON
-/*
+
     it("should find all orders", async () => {
         const customerRepository = new CustomerRepository();
         const customer = new Customer("123", "Customer 1");
@@ -209,7 +208,7 @@ describe("Order repository unit test", () => {
             3
         );
 
-        const order2 = new Order("123", "123", [orderItem2]);
+        const order2 = new Order("456", "123", [orderItem2]);
 
         await orderRepository.create(order2);
 
@@ -219,5 +218,5 @@ describe("Order repository unit test", () => {
         expect(orders).toContainEqual(order);
         expect(orders).toContainEqual(order2);
     });
-    */
+    
 });
