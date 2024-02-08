@@ -64,11 +64,6 @@ export default class OrderRepository implements OrderRepositoryInterface {
         return order;
     }
 
-    // findAll(): Promise<Order[]> {
-    //     throw new Error("Method not implemented.");
-    // }
-
-// ERROR TypeError: Converting circular structure to JSON
     async findAll(): Promise<Order[]> {
         const orderModels = await OrderModel.findAll({
             include: [OrderItemModel],

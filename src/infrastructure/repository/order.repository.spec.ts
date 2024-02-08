@@ -173,8 +173,6 @@ describe("Order repository unit test", () => {
         }).rejects.toThrow("Order not found");
     });
 
-    //Error TypeError: Converting circular structure to JSON
-
     it("should find all orders", async () => {
         const customerRepository = new CustomerRepository();
         const customer = new Customer("123", "Customer 1");
